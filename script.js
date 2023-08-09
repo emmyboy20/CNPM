@@ -41,24 +41,6 @@ const months = [
   "December",
 ];
 
-// const eventsArr = [
-//   {
-//     day: 13,
-//     month: 11,
-//     year: 2022,
-//     events: [
-//       {
-//         title: "Event 1 lorem ipsun dolar sit genfa tersd dsad ",
-//         time: "10:00 AM",
-//       },
-//       {
-//         title: "Event 2",
-//         time: "11:00 AM",
-//       },
-//     ],
-//   },
-// ];
-
 const eventsArr = [];
 getEvents();
 console.log(eventsArr);
@@ -234,10 +216,6 @@ function getActiveDay(date) {
   eventDay.innerHTML = dayName;
   eventDate.innerHTML = date + " " + months[month] + " " + year;
 }
-let editId,
-isEditTask = false,
-todos = JSON.parse(localStorage.getItem("todo-list"));
-
 filters.forEach(btn => {
     btn.addEventListener("click", () => {
         document.querySelector("span.active").classList.remove("active");
@@ -255,18 +233,17 @@ function updateEvents(date) {
       date === event.day &&
       month + 1 === event.month &&
       year === event.year
-    ) { if ( event){
+    ) { 
       event.events.forEach((event) => {
         console.log(event);
-        let completed = event.status == "completed" ? "checked" : "";
        
-        events += `<div class="event">
+       
+        events += `<div class="event">  
             <div class="title">
-            <label for="${eventsArr}">
+            
             <input onclick="updateStatus(this)" type="checkbox" id="${eventsArr}" ${completed}>
-              <!-- <h3 class="event-title">${event.title}</h3> -->
-              <p class="${completed}">${event.title}</p>
-              </label>
+              <h3 class="event-title">${event.title}</h3> 
+              
             </div>
             <div class="event-time">
               <span class="event-time">${event.time}</span>
@@ -274,7 +251,7 @@ function updateEvents(date) {
         </div>`;
         
       });
-    }
+    
     }
   });
   if (events === "") {
@@ -285,26 +262,8 @@ function updateEvents(date) {
   eventsContainer.innerHTML = events;
   saveEvents();
 }
-function showMenu(selectedTask) {
-  let menuDiv = selectedTask.parentElement.lastElementChild;
-  menuDiv.classList.add("show");
-  document.addEventListener("click", e => {
-      if(e.target.tagName != "I" || e.target != selectedTask) {
-          menuDiv.classList.remove("show");
-      }
-  });
-}
-function updateStatus(selectedTask) {
-  let taskName = selectedTask.parentElement.lastElementChild;
-  if(selectedTask.checked) {
-      taskName.classList.add("checked");
-      eventsArr[selectedTask.id].status = "completed";
-  } else {
-      taskName.classList.remove("checked");
-      eventsArr[selectedTask.id].status = "pending";
-  }
-  localStorage.setItem("events", JSON.stringify(eventsArr))
-}
+
+
 
 //function to add event
 addEventBtn.addEventListener("click", () => {
@@ -437,6 +396,37 @@ addEventSubmit.addEventListener("click", () => {
     activeDayEl.classList.add("event");
   }
 });
+eventsContainer.addEventListener("click", (e) => {
+  if (e.target.classList.contains("event")) {
+    if (confirm("Are you sure you want to delete this event?")) {
+      const eventTitle = e.target.children[0].children[1].innerHTML;
+      eventsArr.forEach((event) => {
+        if (
+          event.day === activeDay &&
+          event.month === month + 1 &&
+          event.year === year
+        ) {
+          event.events.forEach((item, index) => {
+            if (item.title === eventTitle) {
+              event.events.splice(index, 1);
+            }
+          });
+          //if no events left in a day then remove that day from eventsArr
+          if (event.events.length === 0) {
+            eventsArr.splice(eventsArr.indexOf(event), 1);
+            //remove event class from day
+            const activeDayEl = document.querySelector(".day.active");
+            if (activeDayEl.classList.contains("events")) {
+              activeDayEl.classList.remove("events");
+            }
+          }
+        }
+      });
+      updateEvents(activeDay);
+    }
+  }
+});
+
 
 
 //function to save events in local storage
